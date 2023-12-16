@@ -1,0 +1,9 @@
+Observer1:
+  file_path: ./tail/test.log
+  mode: ReadFromTail
+  interval: 100
+
+Observer2:
+  file_path: ./tail/test2.log
+  mode: ReadFromHead
+  interval: 10000
