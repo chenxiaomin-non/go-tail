@@ -79,6 +79,10 @@ func GetNewTailContent(fp *os.File, currentOffset int64) ([]byte, error) {
 	return temp, nil
 }
 
+func (o *Observer) Close() {
+	o.FilePath = ""
+}
+
 // start observer, continuously read file content
 // and publish to channel (which is a message queue
 // for all observers, managed by ObsManager)
@@ -107,6 +111,11 @@ func (o *Observer) Start() error {
 			// sleep
 			if o.Interval > 0 {
 				time.Sleep(time.Millisecond * time.Duration(o.Interval))
+			}
+
+			// check close signal
+			if o.FilePath == "" {
+				break
 			}
 		}
 	}()

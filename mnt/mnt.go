@@ -42,6 +42,8 @@ func (m *ObsManager) AddObserver(obs *tail.Observer, name string) {
 	obs.Publisher = m.msg
 }
 
+// Init init all observers from yaml file
+// and start them
 func (m *ObsManager) Init() {
 	// parse yaml file
 	obsMap, err := ParseYaml(DEFAULT_CONFIG_FILEPATH)
@@ -50,6 +52,9 @@ func (m *ObsManager) Init() {
 	}
 
 	// init observers & start them
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
 	m.observers = obsMap
 	for _, obs := range obsMap {
 		obs.Publisher = m.msg
@@ -64,9 +69,22 @@ func (m *ObsManager) CountObservers() int {
 	return len(m.observers)
 }
 
+// PopMessage pop a message from channel
+// this is a blocking call
 func (m *ObsManager) PopMessage() string {
-	m.mu.Lock()
 	msg := <-m.msg
-	defer m.mu.Unlock()
 	return msg
+}
+
+// Update update all observers from yaml file
+// and start them
+func (m *ObsManager) Update() error {
+	// close all observers
+	for _, obs := range m.observers {
+		obs.Close()
+	}
+
+	// re-init
+	m.Init()
+	return nil
 }
